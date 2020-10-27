@@ -9,16 +9,10 @@ import UIKit
 
 class ViewController: UITableViewController {
 
-    struct ViewModel {
-        let posts: [Post]
-
-        struct Post {
-            let title: String?
-        }
-    }
-
     var apiClient = RedditAPIClient()
 
+    typealias ViewModel = ViewControllerViewModel
+    private var viewModelGenerator = ViewControllerViewModelGenerator()
     private var viewModel: ViewModel? = nil
     private var after: String? = nil
 
@@ -27,21 +21,24 @@ class ViewController: UITableViewController {
 
         apiClient.getPosts(after: nil) { result in
             DispatchQueue.main.async { [weak self] in
+                guard let self = self else {
+                    return
+                }
                 guard
                     let posts = try? result.get(),
-                    let viewModel = ViewModel(model: posts)
+                    let viewModel = self.viewModelGenerator.make(with: posts)
                 else {
                     // TODO: error screen
                     return
                 }
-                self?.after = posts.after
-                self?.configure(with: viewModel)
+                self.after = posts.after
+                self.render(viewModel)
             }
         }
 
     }
 
-    private func configure(with viewModel: ViewModel) {
+    private func render(_ viewModel: ViewModel) {
         self.viewModel = viewModel
         guard isViewLoaded else {
             return
@@ -61,21 +58,5 @@ class ViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "tableViewCell", for: indexPath)
         cell.textLabel?.text = viewModel?.posts[indexPath.row].title
         return cell
-    }
-}
-
-extension ViewController.ViewModel {
-    init?(model: PostsAPIResponse?) {
-        guard let model = model else {
-            return nil
-        }
-        let posts = model.data?.children?.compactMap({ Post(model: $0) }) ?? []
-        self.init(posts: posts)
-    }
-}
-
-extension ViewController.ViewModel.Post {
-    init?(model: PostsAPIResponse.Data.Child?) {
-        self.init(title: model?.data?.title)
     }
 }

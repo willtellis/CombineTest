@@ -17,6 +17,8 @@
 		78548CA7254863BA00B7EB57 /* CombineTestUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78548CA6254863BA00B7EB57 /* CombineTestUITests.swift */; };
 		78548CB92548675000B7EB57 /* RedditAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78548CB82548675000B7EB57 /* RedditAPIClient.swift */; };
 		78548CC12548731000B7EB57 /* PostsAPIResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78548CC02548731000B7EB57 /* PostsAPIResponse.swift */; };
+		78548CC6254899D100B7EB57 /* ViewControllerViewModelGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78548CC5254899D000B7EB57 /* ViewControllerViewModelGenerator.swift */; };
+		78548CCE2548BA0900B7EB57 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78548CCD2548BA0900B7EB57 /* ViewControllerViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +55,8 @@
 		78548CA8254863BA00B7EB57 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		78548CB82548675000B7EB57 /* RedditAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedditAPIClient.swift; sourceTree = "<group>"; };
 		78548CC02548731000B7EB57 /* PostsAPIResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostsAPIResponse.swift; sourceTree = "<group>"; };
+		78548CC5254899D000B7EB57 /* ViewControllerViewModelGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerViewModelGenerator.swift; sourceTree = "<group>"; };
+		78548CCD2548BA0900B7EB57 /* ViewControllerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +111,8 @@
 				78548C84254863B900B7EB57 /* AppDelegate.swift */,
 				78548C86254863B900B7EB57 /* SceneDelegate.swift */,
 				78548C88254863B900B7EB57 /* ViewController.swift */,
+				78548CCD2548BA0900B7EB57 /* ViewControllerViewModel.swift */,
+				78548CC5254899D000B7EB57 /* ViewControllerViewModelGenerator.swift */,
 				78548C8A254863B900B7EB57 /* Main.storyboard */,
 				78548C8D254863BA00B7EB57 /* Assets.xcassets */,
 				78548C8F254863BA00B7EB57 /* LaunchScreen.storyboard */,
@@ -273,9 +279,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				78548CB92548675000B7EB57 /* RedditAPIClient.swift in Sources */,
+				78548CC6254899D100B7EB57 /* ViewControllerViewModelGenerator.swift in Sources */,
 				78548C89254863B900B7EB57 /* ViewController.swift in Sources */,
 				78548CC12548731000B7EB57 /* PostsAPIResponse.swift in Sources */,
 				78548C85254863B900B7EB57 /* AppDelegate.swift in Sources */,
+				78548CCE2548BA0900B7EB57 /* ViewControllerViewModel.swift in Sources */,
 				78548C87254863B900B7EB57 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
