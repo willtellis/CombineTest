@@ -29,7 +29,7 @@ class ViewController: UITableViewController {
 
         postsPublisher
             .map { $0.after }
-            .catch { _  in Just(nil) }
+            .catch { _ in Just(nil) }
             .receive(on: DispatchQueue.main)
             .assign(to: \.after, on: self)
             .store(in: &cancellables)
