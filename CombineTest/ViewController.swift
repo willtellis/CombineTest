@@ -28,27 +28,17 @@ class ViewController: UITableViewController {
             .multicast { PassthroughSubject<PostsAPIResponse, Error>() }
 
         postsPublisher
-            .map { posts -> String? in
-                posts.after
-            }
-            .catch { error in
-                Just(nil)
-            }
+            .map { $0.after }
+            .catch { _  in Just(nil) }
             .receive(on: DispatchQueue.main)
             .assign(to: \.after, on: self)
             .store(in: &cancellables)
 
         postsPublisher
             .receive(on: DispatchQueue.main)
-            .map { posts in
-                return self.viewModelGenerator.make(with: posts)
-            }
-            .catch { error in
-                Just(self.viewModelGenerator.make(with: error))
-            }
-            .sink { viewModel in
-                self.render(viewModel)
-            }
+            .map { self.viewModelGenerator.make(with: $0) }
+            .catch { Just(self.viewModelGenerator.make(with: $0)) }
+            .sink { self.render($0) }
             .store(in: &cancellables)
 
         postsPublisher
