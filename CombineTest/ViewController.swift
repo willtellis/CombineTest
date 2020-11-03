@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-class ViewController: UITableViewController {
+class ViewController: UITableViewController, UITableViewDataSourcePrefetching {
 
     var apiClient = RedditAPIClient()
 
@@ -21,14 +21,19 @@ class ViewController: UITableViewController {
 
     private var cancellables = Set<AnyCancellable>()
 
+    private let afterSubject = PassthroughSubject<String?, Never>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.prefetchDataSource = self
 
-        let postsPublisher = apiClient.getPostsPublisher(after: nil)
+        let postsPublisher = afterSubject
+            .removeDuplicates()
+            .flatMap { after in self.apiClient.getPostsPublisher(after: after) }
             .multicast { PassthroughSubject<PostsAPIResponse, Error>() }
 
         postsPublisher
-            .map { $0.after }
+            .map { $0.data?.after }
             .catch { _ in Just(nil) }
             .receive(on: DispatchQueue.main)
             .assign(to: \.after, on: self)
@@ -36,9 +41,11 @@ class ViewController: UITableViewController {
 
         postsPublisher
             .receive(on: DispatchQueue.main)
-            .map { self.viewModelGenerator.make(with: $0) }
+            .map { self.viewModelGenerator.make(appending: $0) }
             .catch { Just(self.viewModelGenerator.make(with: $0)) }
-            .sink { self.render($0) }
+            .sink { (viewModel, indexPaths) in
+                self.render(viewModel, indexPathsToReload: indexPaths)
+            }
             .store(in: &cancellables)
 
         postsPublisher
@@ -46,12 +53,16 @@ class ViewController: UITableViewController {
             .store(in: &self.cancellables)
     }
 
-    private func render(_ viewModel: ViewModel) {
+    private func render(_ viewModel: ViewModel, indexPathsToReload: [IndexPath]?) {
         self.viewModel = viewModel
         guard isViewLoaded else {
             return
         }
-        tableView.reloadData()
+        guard let indexPathsToReload = indexPathsToReload else {
+            tableView.reloadData()
+            return
+        }
+        tableView.reloadRows(at: indexPathsToReload, with: .automatic)
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -59,12 +70,42 @@ class ViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel?.posts.count ?? 0
+        // TODO: How do I actually grow this size if I'm prefetching???
+//        let loadedPostCount = viewModel?.posts.count ?? 0
+//        let loadingPostCount = 25
+//        return loadedPostCount + loadingPostCount
+        return 1000
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "tableViewCell", for: indexPath)
-        cell.textLabel?.text = viewModel?.posts[indexPath.row].title
+        if isLoadingCell(for: indexPath) {
+            cell.textLabel?.text = "LOADING"
+        } else {
+            cell.textLabel?.text = viewModel?.posts[indexPath.row].title
+        }
         return cell
+    }
+
+    // MARK: - UITableViewDataSourcePrefetching
+
+    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        if indexPaths.contains(where: { isLoadingCell(for: $0) }) {
+            print("HERE")
+            afterSubject.send(after)
+        }
+    }
+
+    private func isLoadingCell(for indexPath: IndexPath) -> Bool {
+        guard let count = viewModel?.posts.count else {
+            return true
+        }
+        return indexPath.row >= count
+    }
+
+    private func visibleIndexPathsToReload(intersecting indexPaths: [IndexPath]) -> [IndexPath] {
+      let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows ?? []
+      let indexPathsIntersection = Set(indexPathsForVisibleRows).intersection(indexPaths)
+      return Array(indexPathsIntersection)
     }
 }
