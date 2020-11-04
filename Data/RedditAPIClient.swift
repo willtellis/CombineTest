@@ -33,7 +33,8 @@ struct RedditAPIClient {
                 .eraseToAnyPublisher()
         }
 
-        return URLSession.shared.dataTaskPublisher(for: url).mapError { $0 as Error }
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .mapError { $0 as Error }
             .map { $0.data }
             .decode(type: PostsAPIResponse.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()
