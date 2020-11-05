@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 enum APIError: Error {
     case badURL
@@ -21,34 +22,21 @@ struct RedditAPIClient {
         return components
     }
 
-    func getPosts(after: String?, completion: @escaping (Result<PostsAPIResponse, Error>) -> Void) {
+    func getPostsPublisher(after: String?) -> AnyPublisher<PostsAPIResponse, Error> {
         var components = baseURLComponents
         components.path = "/.json"
         let queryItem = URLQueryItem(name: "after", value: after)
         components.queryItems = [queryItem]
+
         guard let url = components.url else {
-            completion(.failure(APIError.badURL))
-            return
+            return Fail<PostsAPIResponse, Error>(error: APIError.badURL)
+                .eraseToAnyPublisher()
         }
-        let task = URLSession.shared.dataTask(with: url) { (data, _, error) in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
 
-            guard let data = data else {
-                completion(.failure(APIError.noData))
-                return
-            }
-
-            let decoder = JSONDecoder()
-            do {
-                let postsResponse = try decoder.decode(PostsAPIResponse.self, from: data)
-                completion(.success(postsResponse))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-        task.resume()
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .mapError { $0 as Error }
+            .map { $0.data }
+            .decode(type: PostsAPIResponse.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
     }
 }

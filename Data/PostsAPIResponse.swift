@@ -9,10 +9,10 @@ import Foundation
 
 struct PostsAPIResponse: Decodable {
     let data: Data?
-    let after: String?
 
     struct Data: Decodable {
         let children: [Child]?
+        let after: String?
 
         struct Child: Decodable {
             let data: Data?
